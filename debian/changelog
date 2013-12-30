@@ -1,6 +1,6 @@
 cloudprint (0.10-10) UNRELEASED; urgency=low
 
-  *
+  * More robust handling of networking errors during startup.
 
  -- David Steele <dsteele@gmail.com>  Sun, 29 Dec 2013 19:43:40 -0500
 

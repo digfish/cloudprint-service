@@ -1,0 +1,64 @@
+From 2ddb82a092ff913174eacd1f9894e498746678d4 Mon Sep 17 00:00:00 2001
+From: David Steele <dsteele@gmail.com>
+Date: Sun, 29 Dec 2013 19:22:04 -0500
+Subject: [PATCH 32/32] Add retry to pre-daemon login
+
+Closes davesteele/cloudprint-service#8
+---
+ cloudprint/cloudprint.py | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/cloudprint/cloudprint.py b/cloudprint/cloudprint.py
+index 23883a4..4e31da9 100755
+--- a/cloudprint/cloudprint.py
++++ b/cloudprint/cloudprint.py
+@@ -15,6 +15,7 @@ import sys
+ import getopt
+ import logging
+ import logging.handlers
++import socket
+ 
+ import xmpp
+ 
+@@ -471,10 +472,14 @@ def main():
+           cpp.password = getpass.getpass()
+ 
+     #try to login
+-    while True:
++    done = False
++    passes = 0
++    while not done:
+         try:
++            passes += 1
+             sync_printers(cups_connection, cpp)
+-            break
++            printers = cpp.get_printers()
++
+         except rest.REST.RESTException, e:
+             #not a auth error
+             if e.code != 403:
+@@ -484,12 +489,19 @@ def main():
+                 raise
+             #reset the stored auth
+             cpp.set_auth('')
++        except (socket.error, socket.herror, socket.gaierror, socket.timeout), e:
++            if passes > 6:
++                LOGGER.error('ERROR: Network failure on login. Exiting')
++                sys.exit(1)
++
++            LOGGER.error('ERROR: Network failure on login. Will Try again')
++            time.sleep(5)
++        else:
++            done = True
+ 
+     if authonly:
+         sys.exit(0)
+ 
+-    printers = cpp.get_printers()
+-
+     if daemon:
+         try:
+             from daemon import runner
+-- 
+1.8.5.2
+

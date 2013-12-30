@@ -30,4 +30,5 @@ fixdist.patch
 0029-Refresh-XMPP-authentication-in-process_jobs.patch
 0030-Remove-unused-printer_id-member-in-CloudPrintProxy.patch
 0031-Add-f-fast-poll-option-mitigate-XMPP-failure.patch
+0032-Add-retry-to-pre-daemon-login.patch
 python-daemon.patch
